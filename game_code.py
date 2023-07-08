@@ -17,10 +17,11 @@ class Cartagena:
         self.cards = self.cards[12:]
 
     def find_possible_spot(self, current_position, computer_positions, human_positions):
-        for backward_position in range(current_position - 1, 1, -1):
+        for backward_position in range(current_position - 1, 0, -1):
             occupied_pirates = computer_positions.count(backward_position) + human_positions.count(backward_position)
             if occupied_pirates in [1,2]:
                 return backward_position, occupied_pirates
+        return None, None
             
     def find_next_spot(self, player, computer_positions, human_positions, card, pirate_index):
         if player == 'Computer':
@@ -65,16 +66,27 @@ class Cartagena:
     #         self.computer_positions[pirate_index] = best_move['next_position']
     #         self.computer_hand.pop(card_index)
 
-    def move_computer_test(self):
+    def move_computer(self):
         best_move = None
         alpha = float('-inf')
         beta = float('inf')
         depth = 3
         eval, best_move = self.minimax(self.computer_hand, self.human_hand, self.computer_positions, self.human_positions, True, alpha, beta, depth)
         if best_move is not None:
-            if card_index != -1:
+            print(best_move)
+            if best_move['card_index'] != -1:
                 card_index = best_move['card_index']
                 self.computer_hand.pop(card_index)
+            else:
+                occupied_pirates = best_move['occupied_pirates']
+                if occupied_pirates == 1:
+                    new_card = self.cards.pop()
+                    self.computer_hand.append(new_card)
+                elif occupied_pirates == 2:
+                    new_card_1 = self.cards.pop()
+                    new_card_2 = self.cards.pop()
+                    self.computer_hand.append(new_card_1)
+                    self.computer_hand.append(new_card_2)
             pirate_index = best_move['pirate_index']
             self.computer_positions[pirate_index] = best_move['next_position']
 
@@ -82,9 +94,14 @@ class Cartagena:
         # add checks to see if the player is not already on boat and card index and card is present
         card_index = int(input("Enter the index of the card you want to play (or -1 to move backwards): "))
         pirate_index = int(input("Enter the index of the pirate you want to move: "))
+        if self.human_positions[pirate_index] == len(self.board)-1:
+            print('The player is already on the boat cant move him')
+            return
+        if card_index not in range(-1, len(self.human_hand)):
+            print('Invalid card index')
+            return
 
         if card_index == -1:
-            moved_back = False
             # Move backwards and collect a card
             current_position = self.human_positions[pirate_index]
             backward_position, occupied_pirates = self.find_possible_spot(current_position, self.computer_positions, self.human_positions)
@@ -92,14 +109,14 @@ class Cartagena:
                 new_card = self.cards.pop()
                 self.human_hand.append(new_card)
                 self.human_positions[pirate_index] = backward_position
+                moved_back = True
             elif occupied_pirates == 2:
                 new_card_1 = self.cards.pop()
                 new_card_2 = self.cards.pop()
                 self.human_hand.append(new_card_1)
                 self.human_hand.append(new_card_2)
                 self.human_positions[pirate_index] = backward_position
-
-            if moved_back == False:
+            else:
                 print('No suitable spot to move back')
 
         else:
@@ -139,6 +156,8 @@ class Cartagena:
             # Backward movement
             for pirate_index in range(len(computer_positions)):
                 current_position = computer_positions[pirate_index]
+                if current_position == len(self.board) - 1:
+                    continue
                 backward_position, occupied_pirates = self.find_possible_spot(current_position, computer_positions, human_positions)
 
                 if occupied_pirates == 1:
@@ -151,7 +170,8 @@ class Cartagena:
                     computer_positions[pirate_index] = current_position
                     if eval > max_eval:
                         max_eval = eval
-                        best_move = {'card_index': -1, 'pirate_index': pirate_index, 'next_position': backward_position, 'card': card}
+                        best_move = {'card_index': -1, 'pirate_index': pirate_index, 'next_position': backward_position, 
+                                     'occupied_pirates': occupied_pirates}
 
                     alpha = max(alpha, eval)
                     if beta <= alpha:
@@ -171,7 +191,8 @@ class Cartagena:
                     computer_positions[pirate_index] = current_position
                     if eval > max_eval:
                         max_eval = eval
-                        best_move = {'card_index': -1, 'pirate_index': pirate_index, 'next_position': backward_position, 'card': card}
+                        best_move = {'card_index': -1, 'pirate_index': pirate_index, 'next_position': backward_position, 
+                                     'occupied_pirates': occupied_pirates}
 
                     alpha = max(alpha, eval)
                     if beta <= alpha:
@@ -201,6 +222,8 @@ class Cartagena:
             # Backward movement
             for pirate_index in range(len(human_positions)):
                 current_position = human_positions[pirate_index]
+                if current_position == len(self.board) - 1:
+                    continue
                 backward_position, occupied_pirates = self.find_possible_spot(current_position, computer_positions, human_positions)
                 if occupied_pirates == 1:
                     new_card = self.cards.pop()
@@ -235,8 +258,8 @@ class Cartagena:
             return min_eval, best_move
         
     def evaluate_position(self, computer_hand, human_hand, computer_positions, human_positions):
-        boat_weight = 2  # Weight for reaching the boat
-        card_weight = 1  # Weight for collecting cards
+        boat_weight = 1  # Weight for reaching the boat
+        card_weight = 2  # Weight for collecting cards
         computer_score = sum(1 for pos in computer_positions if pos == len(self.board) - 1)
         human_score = sum(1 for pos in human_positions if pos == len(self.board) - 1)
         computer_cards = len(computer_hand)
@@ -266,7 +289,7 @@ class Cartagena:
         print('*************')
         self.display_game_state()
         print('\n')
-        self.move_computer()
+        #self.move_computer()
         while True:
             print("\nComputer's Turn:")
             self.move_computer()
