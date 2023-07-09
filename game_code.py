@@ -4,11 +4,11 @@ class Cartagena:
         self.num_players = num_players
         self.symbols = ['A', 'B', 'C', 'D', 'E', 'F']
         self.cards = ['A', 'B', 'C', 'D', 'E', 'F'] * 17
-        self.board = ['Jail'] + ['A', 'B', 'C', 'D', 'E', 'F'] * 2 + ['Boat']
+        self.board = ['Jail'] + self.symbols * 1 + ['Boat']
         self.computer_hand = []
         self.human_hand = []
-        self.computer_positions = [0] * 6
-        self.human_positions = [0] * 6
+        self.computer_positions = [0] * 3
+        self.human_positions = [0] * 3
 
     def initialize_game(self):
         random.shuffle(self.cards)
@@ -70,7 +70,7 @@ class Cartagena:
         best_move = None
         alpha = float('-inf')
         beta = float('inf')
-        depth = 3
+        depth = 5
         eval, best_move = self.minimax(self.computer_hand, self.human_hand, self.computer_positions, self.human_positions, True, alpha, beta, depth)
         if best_move is not None:
             print(best_move)
@@ -128,7 +128,7 @@ class Cartagena:
             # can show sucess msg and board
      
     def minimax(self, computer_hand, human_hand, computer_positions, human_positions, is_maximizing_player, alpha, beta, depth):
-        if depth == 0:
+        if depth == 0 or self.check_win(computer_positions) or self.check_win(human_positions):
             return self.evaluate_position(computer_hand, human_hand, computer_positions, human_positions), None
 
         if is_maximizing_player:
@@ -140,7 +140,7 @@ class Cartagena:
                 for pirate_index in range(len(computer_positions)):
                     if computer_positions[pirate_index] < len(self.board) - 1: # to check if pirate is not already on boat
                         next_position = self.find_next_spot('Computer', computer_positions, human_positions, card, pirate_index)
-                        
+                        #print(f"pitate_index: {pirate_index}, card: {card}, next_position: {next_position}")
                         if next_position < len(self.board):
                             new_computer_positions = computer_positions[:]
                             new_computer_positions[pirate_index] = next_position
@@ -197,7 +197,7 @@ class Cartagena:
                     alpha = max(alpha, eval)
                     if beta <= alpha:
                         break
-            
+            #print(f"Depth: {depth}, max_eval: {max_eval}, best_move: {best_move}")
             return max_eval, best_move
 
         else: #min turn
@@ -259,11 +259,17 @@ class Cartagena:
         
     def evaluate_position(self, computer_hand, human_hand, computer_positions, human_positions):
         boat_weight = 1  # Weight for reaching the boat
-        card_weight = 2  # Weight for collecting cards
+        card_weight = 1  # Weight for collecting cards
         computer_score = sum(1 for pos in computer_positions if pos == len(self.board) - 1)
         human_score = sum(1 for pos in human_positions if pos == len(self.board) - 1)
+        if computer_score == len(computer_positions):
+            return float('inf')
+        elif human_score == len(human_positions):
+            return float('-inf')
         computer_cards = len(computer_hand)
         human_cards = len(human_hand)
+        computer_penality = 0
+        human_penality = 0
 
         # Special case: One pirate and one card left
         if len(computer_positions) == 1 and computer_cards == 1:
@@ -277,10 +283,13 @@ class Cartagena:
         else:
             # No matching symbol found after current position, pirate can jump on the boat directly
             computer_score += boat_weight
-
+        if computer_cards < (6 - computer_score):
+            computer_penality = -5 
+        elif human_cards < (6 - human_score):
+            human_penality = -5
         # Calculate the weighted scores
-        computer_score = computer_score * boat_weight + computer_cards * card_weight
-        human_score = human_score * boat_weight + human_cards * card_weight
+        computer_score = computer_score * boat_weight + computer_cards * card_weight + computer_penality
+        human_score = human_score * boat_weight + human_cards * card_weight + human_penality
         return computer_score - human_score 
             
     def play(self):
