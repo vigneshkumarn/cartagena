@@ -4,8 +4,9 @@ class Cartagena:
         self.num_players = num_players
         self.symbols = ['A', 'B', 'C', 'D', 'E', 'F']
         self.cards = ['A', 'B', 'C', 'D', 'E', 'F'] * 17
-        self.board = ['Jail'] + self.symbols * 1 + ['Boat']
-        self.computer_hand = []
+        template = ['B', 'D', 'A', 'F', 'C', 'E', 'B', 'F', 'A', 'C', 'E', 'D']
+        self.board = ['Jail'] + template[:6] + ['Boat']
+        self.computer_hand = ['A']
         self.human_hand = []
         self.computer_positions = [0] * 3
         self.human_positions = [0] * 3
@@ -32,39 +33,6 @@ class Cartagena:
             #ensure spot is available
             if (self.board[position] == 'Boat') or (self.board[position] == card and (computer_positions + human_positions).count(position) < 3):
                 return position
-    
-    # def move_computer(self):
-    #     max_eval = float('-inf')
-    #     best_move = None
-    #     alpha = float('-inf')
-    #     beta = float('inf')
-    #     depth = 3
-    #     for card_index, card in enumerate(self.computer_hand):
-    #         for pirate_index in range(len(self.computer_positions)):
-    #             if self.computer_positions[pirate_index] < len(self.board) - 1: # the pirate is not in boat
-    #                 next_position = self.computer_positions[pirate_index] + 1
-    #                 while next_position < len(self.board) and card != self.board[next_position]:
-    #                     next_position += 1
-                    
-    #                 if next_position < len(self.board):
-    #                     new_computer_positions = self.computer_positions[:]
-    #                     new_computer_positions[pirate_index] = next_position
-    #                     moved_card = self.computer_hand.pop(card_index) 
-    #                     eval, _ = self.minimax(self.computer_hand[:card_index] + self.computer_hand[card_index + 1:], self.human_hand, new_computer_positions, self.human_positions, False, alpha, beta, depth - 1)
-    #                     self.computer_hand.insert(card_index, moved_card)
-    #                     if eval > max_eval:
-    #                         max_eval = eval
-    #                         best_move = {'card_index': card_index, 'pirate_index': pirate_index, 'next_position': next_position}
-
-    #                     alpha = max(alpha, eval)
-    #                     if beta <= alpha:
-    #                         break
-
-    #     if best_move is not None:
-    #         card_index = best_move['card_index']
-    #         pirate_index = best_move['pirate_index']
-    #         self.computer_positions[pirate_index] = best_move['next_position']
-    #         self.computer_hand.pop(card_index)
 
     def move_computer(self):
         best_move = None
@@ -145,7 +113,7 @@ class Cartagena:
                             new_computer_positions = computer_positions[:]
                             new_computer_positions[pirate_index] = next_position
                             eval, _ = self.minimax(computer_hand[:card_index] + computer_hand[card_index + 1:], human_hand, new_computer_positions, human_positions, False, alpha, beta, depth - 1)
-                            if eval > max_eval:
+                            if eval >= max_eval:
                                 max_eval = eval
                                 best_move = {'card_index': card_index, 'pirate_index': pirate_index, 'next_position': next_position} #no need to return best move
 
@@ -168,7 +136,7 @@ class Cartagena:
                     self.cards.append(new_card) # add back the card
                     computer_hand.pop()
                     computer_positions[pirate_index] = current_position
-                    if eval > max_eval:
+                    if eval >= max_eval:
                         max_eval = eval
                         best_move = {'card_index': -1, 'pirate_index': pirate_index, 'next_position': backward_position, 
                                      'occupied_pirates': occupied_pirates}
@@ -271,25 +239,26 @@ class Cartagena:
         computer_penality = 0
         human_penality = 0
 
-        # Special case: One pirate and one card left
-        if len(computer_positions) == 1 and computer_cards == 1:
-            pirate_index = 0  # Assuming only one pirate for the computer
-            current_position = computer_positions[pirate_index]
-            card = computer_hand[0]
+        # # Special case: One pirate and one card left
+        # if len(computer_positions) == 1 and computer_cards == 1:
+        #     pirate_index = 0  # Assuming only one pirate for the computer
+        #     current_position = computer_positions[pirate_index]
+        #     card = computer_hand[0]
 
-            for position in range(current_position + 1, len(self.board)):
-                if self.board[position] == card:
-                    break
-        else:
-            # No matching symbol found after current position, pirate can jump on the boat directly
-            computer_score += boat_weight
+        #     for position in range(current_position + 1, len(self.board)):
+        #         if self.board[position] == card:
+        #             break
+        # else:
+        #     # No matching symbol found after current position, pirate can jump on the boat directly
+        #     computer_score += boat_weight
+
         if computer_cards < (6 - computer_score):
             computer_penality = -5 
         elif human_cards < (6 - human_score):
             human_penality = -5
         # Calculate the weighted scores
-        computer_score = computer_score * boat_weight + computer_cards * card_weight + computer_penality
-        human_score = human_score * boat_weight + human_cards * card_weight + human_penality
+        computer_score = computer_score * boat_weight + computer_cards * card_weight + computer_penality + (sum(computer_positions)/2)
+        human_score = human_score * boat_weight + human_cards * card_weight + human_penality + (sum(human_positions)/2)
         return computer_score - human_score 
             
     def play(self):
@@ -329,3 +298,15 @@ class Cartagena:
 # Create a Cartagena game instance with 2 players
 game = Cartagena(2)
 game.play()
+
+
+
+
+# Human's Turn:
+# Enter the index of the card you want to play (or -1 to move backwards): 2
+# Enter the index of the pirate you want to move: 2
+# Board: ['Jail', 'B', 'D', 'A', 'F', 'C', 'E', 'Boat']
+# Computer's Hand: ['E', 'C', 'F']
+# Computer's Positions: [5, 7, 7]
+# Human's Hand: ['B', 'C']
+# Human's Positions: [7, 4, 6]
