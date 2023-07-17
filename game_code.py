@@ -38,7 +38,7 @@ class Cartagena:
         best_move = None
         alpha = float('-inf')
         beta = float('inf')
-        depth = 5
+        depth = 6
         eval, best_move = self.minimax(self.computer_hand, self.human_hand, self.computer_positions, self.human_positions, True, alpha, beta, depth)
         if best_move is not None:
             print(best_move)
@@ -58,13 +58,37 @@ class Cartagena:
             pirate_index = best_move['pirate_index']
             self.computer_positions[pirate_index] = best_move['next_position']
 
+    def move_computer_1(self):
+        best_move = None
+        alpha = float('-inf')
+        beta = float('inf')
+        depth = 3
+        eval, best_move = self.minimax(self.human_hand, self.computer_hand, self.human_positions, self.computer_positions, True, alpha, beta, depth)
+        if best_move is not None:
+            print(best_move)
+            if best_move['card_index'] != -1:
+                card_index = best_move['card_index']
+                self.human_hand.pop(card_index)
+            else:
+                occupied_pirates = best_move['occupied_pirates']
+                if occupied_pirates == 1:
+                    new_card = self.cards.pop()
+                    self.human_hand.append(new_card)
+                elif occupied_pirates == 2:
+                    new_card_1 = self.cards.pop()
+                    new_card_2 = self.cards.pop()
+                    self.human_hand.append(new_card_1)
+                    self.human_hand.append(new_card_2)
+            pirate_index = best_move['pirate_index']
+            self.human_positions[pirate_index] = best_move['next_position']
+
     def move_human(self):
         # add checks to see if the player is not already on boat and card index and card is present
         card_index = int(input("Enter the index of the card you want to play (or -1 to move backwards): "))
         pirate_index = int(input("Enter the index of the pirate you want to move: "))
-        if self.human_positions[pirate_index] == len(self.board)-1:
-            print('The player is already on the boat cant move him')
-            return
+        # if self.human_positions[pirate_index] == len(self.board)-1:
+        #     print('The player is already on the boat cant move him')
+        #     return
         if card_index not in range(-1, len(self.human_hand)):
             print('Invalid card index')
             return
@@ -115,8 +139,7 @@ class Cartagena:
                             eval, _ = self.minimax(computer_hand[:card_index] + computer_hand[card_index + 1:], human_hand, new_computer_positions, human_positions, False, alpha, beta, depth - 1)
                             if eval >= max_eval:
                                 max_eval = eval
-                                best_move = {'card_index': card_index, 'pirate_index': pirate_index, 'next_position': next_position} #no need to return best move
-
+                                best_move = {'card_index': card_index, 'pirate_index': pirate_index, 'next_position': next_position, 'depth': depth} #no need to return best move
                             alpha = max(alpha, eval)
                             if beta <= alpha:
                                 break
@@ -124,8 +147,8 @@ class Cartagena:
             # Backward movement
             for pirate_index in range(len(computer_positions)):
                 current_position = computer_positions[pirate_index]
-                if current_position == len(self.board) - 1:
-                    continue
+                # if current_position == len(self.board) - 1:
+                #     continue
                 backward_position, occupied_pirates = self.find_possible_spot(current_position, computer_positions, human_positions)
 
                 if occupied_pirates == 1:
@@ -160,7 +183,7 @@ class Cartagena:
                     if eval > max_eval:
                         max_eval = eval
                         best_move = {'card_index': -1, 'pirate_index': pirate_index, 'next_position': backward_position, 
-                                     'occupied_pirates': occupied_pirates}
+                                     'occupied_pirates': occupied_pirates, 'depth': depth}
 
                     alpha = max(alpha, eval)
                     if beta <= alpha:
@@ -278,7 +301,7 @@ class Cartagena:
                 break
 
             print("\nHuman's Turn:")
-            self.move_human()
+            self.move_computer_1()
             self.display_game_state()
 
             if self.check_win(self.human_positions):
