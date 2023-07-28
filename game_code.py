@@ -20,18 +20,12 @@ class Cartagena:
         self.symbols = ['A', 'B', 'C', 'D', 'E', 'F']
         self.cards = ['A', 'B', 'C', 'D', 'E', 'F'] * 17
         template = ['B', 'D', 'A', 'F', 'C', 'E', 'B', 'F', 'A', 'C', 'E', 'D']
-        self.board = ['Jail'] + template[:6] + ['Boat']
-        # self.computer_hand = ['A']
-        # self.human_hand = []
-        # self.computer_positions = [0] * 3
-        # self.human_positions = [0] * 3
+        self.board = ['Jail'] + template + ['Boat']
         self.player_1 = player_1
         self.player_2 = player_2
 
     def initialize_game(self):
         random.shuffle(self.cards)
-        # self.computer_hand = self.cards[:6]
-        # self.human_hand = self.cards[6:12]
         self.player_1.hand = self.cards[:6]
         self.player_2.hand = self.cards[6:12]
         self.cards = self.cards[12:]
@@ -53,35 +47,35 @@ class Cartagena:
             if (self.board[position] == 'Boat') or (self.board[position] == card and (computer_positions + human_positions).count(position) < 3):
                 return position
 
-    def move_computer(self):
+    def move_computer(self, max_player, min_player):
         best_move = None
         alpha = float('-inf')
         beta = float('inf')
         depth = 3
-        strategy = self.player_1.strategy
+        strategy = max_player.strategy
         #eval, best_move = self.minimax(self.computer_hand, self.human_hand, self.computer_positions, self.human_positions, True, alpha, beta, depth)
-        eval, best_move = self.minimax(self.player_1.hand, self.player_2.hand, self.player_1.positions, self.player_2.positions, True, alpha, beta, depth, strategy)
+        eval, best_move = self.minimax(max_player.hand, min_player.hand, max_player.positions, min_player.positions, True, alpha, beta, depth, strategy)
         if best_move is not None:
-            # print(best_move)
+            print(best_move)
             if best_move['card_index'] != -1:
                 card_index = best_move['card_index']
                 #self.computer_hand.pop(card_index)
-                self.player_1.hand.pop(card_index)
+                max_player.hand.pop(card_index)
             else:
                 occupied_pirates = best_move['occupied_pirates']
                 if occupied_pirates == 1:
                     new_card = self.cards.pop()
-                    self.player_1.hand.append(new_card)
+                    max_player.hand.append(new_card)
                 elif occupied_pirates == 2:
                     new_card_1 = self.cards.pop()
                     new_card_2 = self.cards.pop()
                     #self.computer_hand.append(new_card_1)
                     #self.computer_hand.append(new_card_2)
-                    self.player_1.hand.append(new_card_1)
-                    self.player_1.hand.append(new_card_2)
+                    max_player.hand.append(new_card_1)
+                    max_player.hand.append(new_card_2)
             pirate_index = best_move['pirate_index']
             #self.computer_positions[pirate_index] = best_move['next_position']
-            self.player_1.positions[pirate_index] = best_move['next_position']
+            max_player.positions[pirate_index] = best_move['next_position']
 
     def move_computer_1(self):
         best_move = None
@@ -245,8 +239,8 @@ class Cartagena:
             # Backward movement
             for pirate_index in range(len(human_positions)):
                 current_position = human_positions[pirate_index]
-                if current_position == len(self.board) - 1:
-                    continue
+                # if current_position == len(self.board) - 1:
+                #     continue
                 backward_position, occupied_pirates = self.find_possible_spot(current_position, computer_positions, human_positions)
                 if occupied_pirates == 1:
                     new_card = self.cards.pop()
@@ -294,19 +288,6 @@ class Cartagena:
         computer_penality = 0
         human_penality = 0
         progress_weight = strategy.pw
-
-        # # Special case: One pirate and one card left
-        # if len(computer_positions) == 1 and computer_cards == 1:
-        #     pirate_index = 0  # Assuming only one pirate for the computer
-        #     current_position = computer_positions[pirate_index]
-        #     card = computer_hand[0]
-
-        #     for position in range(current_position + 1, len(self.board)):
-        #         if self.board[position] == card:
-        #             break
-        # else:
-        #     # No matching symbol found after current position, pirate can jump on the boat directly
-        #     computer_score += boat_weight
 
         if computer_cards < (6 - computer_score):
             computer_penality = -strategy.penality 
@@ -366,7 +347,7 @@ class Cartagena:
         print('\n')
         while True:
             print("\nComputer's Turn:")
-            self.move_computer()
+            self.move_computer(self.player_1, self.player_2)
             self.display_game_state()
 
             if self.check_win(self.player_1.positions):
@@ -380,6 +361,9 @@ class Cartagena:
             if self.check_win(self.player_2.positions):
                 print("Human wins!")
                 break
+
+    def test_method(self, hand):
+        hand.pop()
 
 
 def simulation(times, display_result):
@@ -398,13 +382,22 @@ def simulation(times, display_result):
     print(f"{player_1.name} win percentage: {(result[0]/ times) * 100} %")
     print(f"{player_2.name} win percentage: {(result[1]/times) * 100} %")
 
-# # Create a Cartagena game instance with 2 players
+# Create a Cartagena game instance with 2 players
+st = Strategy(1,0.5,1,5)
+player_1 = Player('p1', st)
+player_2 = Player('p2', None)
+game = Cartagena(2, player_1, player_2)
+game.human_play()
+
+
+# simulation(20, False)
+
+
 # st = Strategy(1,0.5,1,5)
 # player_1 = Player('p1', st)
 # player_2 = Player('p2', None)
 # game = Cartagena(2, player_1, player_2)
-# game.human_play()
-
-
-simulation(100, False)
-
+# game.initialize_game()
+# print(game.player_1.hand)
+# game.test_method(game.player_1.hand)
+# print(game.player_1.hand)
