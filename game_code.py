@@ -56,7 +56,7 @@ class Cartagena:
         #eval, best_move = self.minimax(self.computer_hand, self.human_hand, self.computer_positions, self.human_positions, True, alpha, beta, depth)
         eval, best_move = self.minimax(max_player.hand, min_player.hand, max_player.positions, min_player.positions, True, alpha, beta, depth, strategy)
         if best_move is not None:
-            print(best_move)
+            # print(best_move)
             if best_move['card_index'] != -1:
                 card_index = best_move['card_index']
                 #self.computer_hand.pop(card_index)
@@ -307,7 +307,7 @@ class Cartagena:
             print('\n')
         while True:
             # print("\nComputer's Turn:")
-            self.move_computer()
+            self.move_computer(self.player_1, self.player_2)
             if display:
                 print("\nComputer's Turn:")
                 self.display_game_state()
@@ -318,7 +318,7 @@ class Cartagena:
                 return(0)
                 break
 
-            self.move_computer_1()
+            self.move_computer(self.player_2, self.player_1)
             if display:
                 print("\nHuman's Turn:")
                 self.display_game_state()
@@ -382,22 +382,12 @@ def simulation(times, display_result):
     print(f"{player_1.name} win percentage: {(result[0]/ times) * 100} %")
     print(f"{player_2.name} win percentage: {(result[1]/times) * 100} %")
 
-# Create a Cartagena game instance with 2 players
-st = Strategy(1,0.5,1,5)
-player_1 = Player('p1', st)
-player_2 = Player('p2', None)
-game = Cartagena(2, player_1, player_2)
-game.human_play()
-
-
-# simulation(20, False)
-
-
+# # Create a Cartagena game instance with 2 players
 # st = Strategy(1,0.5,1,5)
 # player_1 = Player('p1', st)
 # player_2 = Player('p2', None)
 # game = Cartagena(2, player_1, player_2)
-# game.initialize_game()
-# print(game.player_1.hand)
-# game.test_method(game.player_1.hand)
-# print(game.player_1.hand)
+# game.human_play()
+
+
+simulation(10, False)
