@@ -44,7 +44,7 @@ class Cartagena:
             current_position = human_positions[pirate_index]
         for position in range(current_position+1, len(self.board)):
             #ensure spot is available
-            if (self.board[position] == 'Boat') or (self.board[position] == card and (computer_positions + human_positions).count(position) < 3):
+            if (self.board[position] == 'Boat') or (self.board[position] == card and (computer_positions + human_positions).count(position) == 0):
                 return position
 
     def move_computer(self, max_player, min_player):
@@ -289,11 +289,17 @@ class Cartagena:
         human_penality = 0
         progress_weight = strategy.pw
 
-        if computer_cards < (6 - computer_score):
+        if computer_cards < (3 - computer_score):
             computer_penality = -strategy.penality 
-        elif human_cards < (6 - human_score):
+        elif human_cards < (3 - human_score):
             human_penality = -strategy.penality
         # Calculate the weighted scores
+
+        if computer_cards > 2 * (3 - computer_score):
+            computer_penality += -10 
+        elif human_cards > 2 * (3 - human_score):
+            human_penality += -10
+
         computer_score = computer_score * boat_weight + computer_cards * card_weight + computer_penality + (sum(computer_positions) * progress_weight)
         human_score = human_score * boat_weight + human_cards * card_weight + human_penality + (sum(human_positions) * progress_weight)
         return computer_score - human_score 
@@ -368,11 +374,12 @@ class Cartagena:
 
 def simulation(times, display_result):
     result = [0] * 2
-    st = Strategy(1,0.5,1,5)
+    st = Strategy(5,1,1,5)
     st1 = Strategy(3,0.5,1,2)
+    st3 = Strategy(33, 3, 1, 5)
     for i in range(times):
         player_1 = Player('p1', st)
-        player_2 = Player('p2', st1)
+        player_2 = Player('p2', st3)
         game = Cartagena(2, player_1, player_2)
         x = game.play(display_result)
         #print("i:", i, "result:", x)
@@ -390,4 +397,4 @@ def simulation(times, display_result):
 # game.human_play()
 
 
-simulation(10, False)
+#simulation(50, False)
