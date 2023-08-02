@@ -20,7 +20,7 @@ class Cartagena:
         self.symbols = ['A', 'B', 'C', 'D', 'E', 'F']
         self.cards = ['A', 'B', 'C', 'D', 'E', 'F'] * 17
         template = ['B', 'D', 'A', 'F', 'C', 'E', 'B', 'F', 'A', 'C', 'E', 'D']
-        self.board = ['Jail'] + template + ['Boat']
+        self.board = ['Jail'] + template[:6] + ['Boat']
         self.player_1 = player_1
         self.player_2 = player_2
 
@@ -338,12 +338,32 @@ class Cartagena:
     def check_win(self, positions):
         return all(position == len(self.board) - 1 for position in positions)
 
-    def display_game_state(self):
-        print("Board:", self.board)
+    def display_game_state(self):  
+        indexed_board = [f"{str(idx)}. {symbol.center(4)}" for idx, symbol in enumerate(self.board)]
+        print("Board:", indexed_board)
+
+        print("\nC:   ", self.formatting(self.player_1.positions))
+        print("\nH:   ", self.formatting(self.player_2.positions))
+        print("\n\n")
         print("Computer's Hand:", self.player_1.hand)
         print("Computer's Positions:", self.player_1.positions)
         print("Human's Hand:", self.player_2.hand)
         print("Human's Positions:", self.player_2.positions)
+
+    def formatting(self, pos_list):
+        new_list = [[] for _ in range(len(self.board))]
+
+        for idx, pos in enumerate(pos_list):
+            pirate = f'P{idx}'
+            new_list[pos].append(pirate)
+
+        for idx, pirates in enumerate(new_list):
+            if pirates:
+                new_list[idx] = '|'.join(pirates)
+            else:
+                new_list[idx] = ''
+        formatted_list = [f'{item.center(7)}' for item in new_list]
+        return formatted_list
 
     def human_play(self):
         self.initialize_game()
@@ -389,12 +409,12 @@ def simulation(times, display_result):
     print(f"{player_1.name} win percentage: {(result[0]/ times) * 100} %")
     print(f"{player_2.name} win percentage: {(result[1]/times) * 100} %")
 
-# # Create a Cartagena game instance with 2 players
-# st = Strategy(1,0.5,1,5)
-# player_1 = Player('p1', st)
-# player_2 = Player('p2', None)
-# game = Cartagena(2, player_1, player_2)
-# game.human_play()
+# Create a Cartagena game instance with 2 players
+st = Strategy(5,1,1,5)
+player_1 = Player('p1', st)
+player_2 = Player('p2', None)
+game = Cartagena(2, player_1, player_2)
+game.human_play()
 
 
 #simulation(50, False)
