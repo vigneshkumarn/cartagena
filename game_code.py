@@ -272,7 +272,9 @@ class Cartagena:
 
             return min_eval, best_move
         
-    def evaluate_position(self, computer_hand, human_hand, computer_positions, human_positions, strategy):
+    def evaluate_position(self, computer_hand, human_hand, 
+                          computer_positions, human_positions, strategy):
+        
         boat_weight = strategy.bw  # Weight for reaching the boat
         card_weight = strategy.cw  # Weight for collecting cards
         progress_weight = strategy.pw #progress weight
@@ -303,8 +305,15 @@ class Cartagena:
         elif human_cards > 2 * (number_of_pirates - human_score):
             human_penality += -strategy.penality
 
-        computer_points = computer_score * boat_weight + computer_cards * card_weight + computer_penality + (sum(computer_positions) * progress_weight)
-        human_points = human_score * boat_weight + human_cards * card_weight + human_penality + (sum(human_positions) * progress_weight)
+        computer_points = computer_score * boat_weight
+        computer_points += computer_cards * card_weight
+        computer_points += computer_penality
+        computer_points += sum(computer_positions) * progress_weight
+
+        human_points = human_score * boat_weight
+        human_points += human_cards * card_weight
+        human_points += human_penality
+        human_points += sum(human_positions) * progress_weight
 
         return computer_points - human_points 
             
