@@ -56,7 +56,7 @@ class Cartagena:
         #eval, best_move = self.minimax(self.computer_hand, self.human_hand, self.computer_positions, self.human_positions, True, alpha, beta, depth)
         eval, best_move = self.minimax(max_player.hand, min_player.hand, max_player.positions, min_player.positions, True, alpha, beta, depth, strategy)
         if best_move is not None:
-            # print(best_move)
+            print(best_move)
             if best_move['card_index'] != -1:
                 card_index = best_move['card_index']
                 #self.computer_hand.pop(card_index)
@@ -77,36 +77,36 @@ class Cartagena:
             #self.computer_positions[pirate_index] = best_move['next_position']
             max_player.positions[pirate_index] = best_move['next_position']
 
-    def move_computer_1(self):
-        best_move = None
-        alpha = float('-inf')
-        beta = float('inf')
-        depth = 3
-        strategy = self.player_2.strategy
-        # eval, best_move = self.minimax(self.human_hand, self.computer_hand, self.human_positions, self.computer_positions, True, alpha, beta, depth)
-        eval, best_move = self.minimax(self.player_2.hand, self.player_1.hand, self.player_2.positions, self.player_1.positions, True, alpha, beta, depth, strategy)
-        if best_move is not None:
-            # print(best_move)
-            if best_move['card_index'] != -1:
-                card_index = best_move['card_index']
-                #self.human_hand.pop(card_index)
-                self.player_2.hand.pop(card_index)
-            else:
-                occupied_pirates = best_move['occupied_pirates']
-                if occupied_pirates == 1:
-                    new_card = self.cards.pop()
-                    #self.human_hand.append(new_card)
-                    self.player_2.hand.append(new_card)
-                elif occupied_pirates == 2:
-                    new_card_1 = self.cards.pop()
-                    new_card_2 = self.cards.pop()
-                    # self.human_hand.append(new_card_1)
-                    # self.human_hand.append(new_card_2)
-                    self.player_2.hand.append(new_card_1)
-                    self.player_2.hand.append(new_card_2)
-            pirate_index = best_move['pirate_index']
-            # self.human_positions[pirate_index] = best_move['next_position']
-            self.player_2.positions[pirate_index] = best_move['next_position']
+    # def move_computer_1(self):
+    #     best_move = None
+    #     alpha = float('-inf')
+    #     beta = float('inf')
+    #     depth = 3
+    #     strategy = self.player_2.strategy
+    #     # eval, best_move = self.minimax(self.human_hand, self.computer_hand, self.human_positions, self.computer_positions, True, alpha, beta, depth)
+    #     eval, best_move = self.minimax(self.player_2.hand, self.player_1.hand, self.player_2.positions, self.player_1.positions, True, alpha, beta, depth, strategy)
+    #     if best_move is not None:
+    #         # print(best_move)
+    #         if best_move['card_index'] != -1:
+    #             card_index = best_move['card_index']
+    #             #self.human_hand.pop(card_index)
+    #             self.player_2.hand.pop(card_index)
+    #         else:
+    #             occupied_pirates = best_move['occupied_pirates']
+    #             if occupied_pirates == 1:
+    #                 new_card = self.cards.pop()
+    #                 #self.human_hand.append(new_card)
+    #                 self.player_2.hand.append(new_card)
+    #             elif occupied_pirates == 2:
+    #                 new_card_1 = self.cards.pop()
+    #                 new_card_2 = self.cards.pop()
+    #                 # self.human_hand.append(new_card_1)
+    #                 # self.human_hand.append(new_card_2)
+    #                 self.player_2.hand.append(new_card_1)
+    #                 self.player_2.hand.append(new_card_2)
+    #         pirate_index = best_move['pirate_index']
+    #         # self.human_positions[pirate_index] = best_move['next_position']
+    #         self.player_2.positions[pirate_index] = best_move['next_position']
 
     def move_human(self):
         # add checks to see if the player is not already on boat and card index and card is present
@@ -127,7 +127,6 @@ class Cartagena:
                 new_card = self.cards.pop()
                 self.player_2.hand.append(new_card)
                 self.player_2.positions[pirate_index] = backward_position
-                moved_back = True
             elif occupied_pirates == 2:
                 new_card_1 = self.cards.pop()
                 new_card_2 = self.cards.pop()
@@ -143,7 +142,6 @@ class Cartagena:
             next_position = self.find_next_spot('Human', self.player_1.positions, self.player_2.positions, card, pirate_index)
             self.player_2.positions[pirate_index] = next_position
             self.player_2.hand.pop(card_index)
-            # can show sucess msg and board
      
     def minimax(self, computer_hand, human_hand, computer_positions, human_positions, is_maximizing_player, alpha, beta, depth, strategy):
         if depth == 0 or self.check_win(computer_positions) or self.check_win(human_positions):
@@ -246,7 +244,7 @@ class Cartagena:
                     new_card = self.cards.pop()
                     human_hand.append(new_card)
                     human_positions[pirate_index] = backward_position
-                    eval, _ = self.minimax(computer_hand, human_hand, computer_positions, human_positions, False, alpha, beta, depth - 1, strategy)
+                    eval, _ = self.minimax(computer_hand, human_hand, computer_positions, human_positions, True, alpha, beta, depth - 1, strategy)
                     self.cards.append(new_card) # add back the card
                     human_hand.pop()
                     human_positions[pirate_index] = current_position
@@ -261,7 +259,7 @@ class Cartagena:
                     human_hand.append(new_card_1)
                     human_hand.append(new_card_2)
                     human_positions[pirate_index] = backward_position
-                    eval, _ = self.minimax(computer_hand, human_hand, computer_positions, human_positions, False, alpha, beta, depth - 1, strategy)
+                    eval, _ = self.minimax(computer_hand, human_hand, computer_positions, human_positions, True, alpha, beta, depth - 1, strategy)
                     self.cards.append(new_card_1) 
                     self.cards.append(new_card_2)
                     human_hand.pop() 
@@ -277,32 +275,38 @@ class Cartagena:
     def evaluate_position(self, computer_hand, human_hand, computer_positions, human_positions, strategy):
         boat_weight = strategy.bw  # Weight for reaching the boat
         card_weight = strategy.cw  # Weight for collecting cards
+        progress_weight = strategy.pw #progress weight
+
+        number_of_pirates = len(self.player_1.positions)
         computer_score = sum(1 for pos in computer_positions if pos == len(self.board) - 1)
         human_score = sum(1 for pos in human_positions if pos == len(self.board) - 1)
         if computer_score == len(computer_positions):
             return float('inf')
         elif human_score == len(human_positions):
             return float('-inf')
+        
         computer_cards = len(computer_hand)
         human_cards = len(human_hand)
         computer_penality = 0
         human_penality = 0
         progress_weight = strategy.pw
 
-        if computer_cards < (3 - computer_score):
+        # penality - fewer cards in hand than required
+        if computer_cards < (number_of_pirates - computer_score):
             computer_penality = -strategy.penality 
-        elif human_cards < (3 - human_score):
+        elif human_cards < (number_of_pirates - human_score):
             human_penality = -strategy.penality
-        # Calculate the weighted scores
+ 
+        # penality - too many cards than required
+        if computer_cards > 2 * (number_of_pirates - computer_score):
+            computer_penality += -strategy.penality 
+        elif human_cards > 2 * (number_of_pirates - human_score):
+            human_penality += -strategy.penality
 
-        if computer_cards > 2 * (3 - computer_score):
-            computer_penality += -10 
-        elif human_cards > 2 * (3 - human_score):
-            human_penality += -10
+        computer_points = computer_score * boat_weight + computer_cards * card_weight + computer_penality + (sum(computer_positions) * progress_weight)
+        human_points = human_score * boat_weight + human_cards * card_weight + human_penality + (sum(human_positions) * progress_weight)
 
-        computer_score = computer_score * boat_weight + computer_cards * card_weight + computer_penality + (sum(computer_positions) * progress_weight)
-        human_score = human_score * boat_weight + human_cards * card_weight + human_penality + (sum(human_positions) * progress_weight)
-        return computer_score - human_score 
+        return computer_points - human_points 
             
     def play(self, display = True):
         self.initialize_game()
@@ -315,23 +319,23 @@ class Cartagena:
             # print("\nComputer's Turn:")
             self.move_computer(self.player_1, self.player_2)
             if display:
-                print("\nComputer's Turn:")
+                print("\nPlater 1's Turn:")
                 self.display_game_state()
 
             if self.check_win(self.player_1.positions):
                 if display:
-                    print("Computer wins!")
+                    print("Player 1 wins!")
                 return(0)
                 break
 
             self.move_computer(self.player_2, self.player_1)
             if display:
-                print("\nHuman's Turn:")
+                print("\nPlayer 2's Turn:")
                 self.display_game_state()
 
             if self.check_win(self.player_2.positions):
                 if display:
-                    print("Human wins!")
+                    print("Player 2 wins!")
                 return(1)
                 break
 
@@ -392,29 +396,38 @@ class Cartagena:
         hand.pop()
 
 
-def simulation(times, display_result):
-    result = [0] * 2
-    st = Strategy(5,1,1,5)
-    st1 = Strategy(3,0.5,1,2)
-    st3 = Strategy(33, 3, 1, 5)
-    for i in range(times):
-        player_1 = Player('p1', st)
-        player_2 = Player('p2', st3)
-        game = Cartagena(2, player_1, player_2)
-        x = game.play(display_result)
-        #print("i:", i, "result:", x)
-        result[x] += 1 
+# def simulation(times, display_result):
+#     result = [0] * 2
+#     st = Strategy(5,1,1,5)
+#     st1 = Strategy(3,0.5,1,2)
+#     st3 = Strategy(33, 3, 1, 5)
+#     bt_st = Strategy(0.5, 0.3, 0.15, 0.05)
+#     gp_st = Strategy(0.3, 0.5, 0.15, 0.05)
+#     cd_st = Strategy(0.3,0.15,0.4,0.15)
+#     op_st = Strategy(0.78, 0.071, 0.023, 0.1190)
+#     for i in range(times):
+#         player_1 = Player('p1', bt_st)
+#         player_2 = Player('p2', op_st)
+#         game = Cartagena(2, player_1, player_2)
+#         x = game.play(display_result)
+#         #print("i:", i, "result:", x)
+#         result[x] += 1 
     
-    print("Total Plays:", times)
-    print(f"{player_1.name} win percentage: {(result[0]/ times) * 100} %")
-    print(f"{player_2.name} win percentage: {(result[1]/times) * 100} %")
+#     print("Total Plays:", times)
+#     print(f"{player_1.name} win percentage: {(result[0]/ times) * 100} %")
+#     print(f"{player_2.name} win percentage: {(result[1]/times) * 100} %")
+#     print(result)
 
 # Create a Cartagena game instance with 2 players
-st = Strategy(5,1,1,5)
+# st = Strategy(5,1,1,5)
+st = Strategy(0.78, 0.071, 0.023, 0.1190)
 player_1 = Player('p1', st)
 player_2 = Player('p2', None)
 game = Cartagena(2, player_1, player_2)
 game.human_play()
 
 
-#simulation(50, False)
+# simulation(50, False)
+
+
+# bt vs gp = 60, 40, bt vs cd = 56, 44, gp vs cd = 66, 34, op vs bt = 63,38
