@@ -390,7 +390,7 @@ def simulation(times, display_result):
     print(f"{player_2.name} win percentage: {(result[1]/times) * 100} %")
 
 
-######## To run simulation
+####### To run simulation
 #simulation(10, False)  
 
 
