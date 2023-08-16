@@ -3,7 +3,7 @@ import random
 class Player:
     def __init__(self, name, strategy):
         self.hand = []
-        self.positions = [0] * 3
+        self.positions = [0] * 3 
         self.name = name
         self.strategy = strategy
 
@@ -60,7 +60,6 @@ class Cartagena:
             print(best_move)
             if best_move['card_index'] != -1:
                 card_index = best_move['card_index']
-                #self.computer_hand.pop(card_index)
                 max_player.hand.pop(card_index)
             else:
                 occupied_pirates = best_move['occupied_pirates']
@@ -80,8 +79,13 @@ class Cartagena:
         # add checks to see if the player is not already on boat and card index and card is present
         card_index = int(input("Enter the index of the card you want to play (or -1 to move backwards): "))
         pirate_index = int(input("Enter the index of the pirate you want to move: "))
+
         if card_index not in range(-1, len(self.player_2.hand)):
             print('Invalid card index')
+            return
+        
+        if (len(self.board) -1 == self.player_2.positions[pirate_index] and card_index != -1):
+            print('Pirate already on boat, cant move him forward!!!')
             return
 
         if card_index == -1:
@@ -375,8 +379,8 @@ def simulation(times, display_result):
     cd_st = Strategy(0.3,0.15,0.4,0.15)
     op_st = Strategy(0.78, 0.071, 0.023, 0.1190)
     for i in range(times):
-        player_1 = Player('p1', bt_st)
-        player_2 = Player('p2', op_st)
+        player_1 = Player('p1', op_st)
+        player_2 = Player('p2', bt_st)
         game = Cartagena(2, player_1, player_2)
         x = game.play(display_result)
         result[x] += 1 
@@ -384,12 +388,10 @@ def simulation(times, display_result):
     print("Total Plays:", times)
     print(f"{player_1.name} win percentage: {(result[0]/ times) * 100} %")
     print(f"{player_2.name} win percentage: {(result[1]/times) * 100} %")
-    print(result)
-
 
 
 ######## To run simulation
-# simulation(10, False)  
+#simulation(10, False)  
 
 
 ######## Code for AI vs Human
